@@ -16,10 +16,10 @@ $ ./geom
 Licence
 -------
 
+Copyright (C) 2022 Tim Marston <tim@ed.am>
+
 [GNU General Public Licence (version 3 or later)](../master/LICENCE)
 
---
 
-Copyright (C) 2022 Tim Marston <tim@ed.am>
 
 [vlang]: http://vlang.io
