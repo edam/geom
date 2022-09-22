@@ -1,6 +1,6 @@
 // geom.v
 //
-// Copyright (C) 2022 Tim Marston <tim@edm.am>
+// Copyright (C) 2022 Tim Marston <tim@ed.am>
 //
 // This file is part of Geom (hereafter referred to as "this program").
 // See http://github.com/edam/geom for more information.

@@ -3,6 +3,8 @@ Geom
 
 Simple geometry toy, written in [vlang].
 
+![Screenshot](../master/screenshot.png)
+
 Installation
 ------------
 
@@ -18,6 +20,6 @@ Licence
 
 --
 
-Copyright (C) 2022 Tim Marston <tim@edm.am>
+Copyright (C) 2022 Tim Marston <tim@ed.am>
 
 [vlang]: http://vlang.io
