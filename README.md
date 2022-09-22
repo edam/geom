@@ -3,7 +3,7 @@ Geom
 
 Simple geometry toy, written in [vlang].
 
-![Screenshot](../master/screenshot.png | width=613)
+![Screenshot](../master/screenshot.png)
 
 Installation
 ------------
