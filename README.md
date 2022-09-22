@@ -14,9 +14,10 @@ $ ./geom
 Licence
 -------
 
-[GNU General Public Licence (version 3 or later)](../blob/master/LICENCE)
+[GNU General Public Licence (version 3 or later)](../master/LICENCE)
 
 --
+
 Copyright (C) 2022 Tim Marston <tim@edm.am>
 
 [vlang]: http://vlang.io
