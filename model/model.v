@@ -181,12 +181,14 @@ fn (mut m Model) save( filename string ) ! {
     out.writeln( "geom/1" )
 
     // geometry
-    out.writeln( "geometry" )
-    for id, g in m.geometry {
-        out.writeln( "${id}:${g.kind()}" )
-        g.serialise( mut out )
+    if m.geometry.len > 0 {
+        out.writeln( "geometry" )
+        for id, g in m.geometry {
+            out.writeln( "${id}:${g.kind()}" )
+            g.serialise( mut out )
+        }
+        out.writeln( "end" )
     }
-    out.writeln( "end" )
 
     wrote := f.write_string( out.str() )!
     if wrote < 1 {
