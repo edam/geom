@@ -5,37 +5,38 @@
 module model
 
 import ui
+import strings
 
 pub enum UIState {
     normal
-    selected
     highlighted
+    selected
     cursor
 }
 
 interface Geom {
+    id Id
+    kind() string
     test( f64, f64 ) f64
     draw( ui.DrawDevice, ui.CanvasLayout, UIState )
+    serialise( mut strings.Builder )
+    handle() (f64, f64)
     mut:
-    add()
-    remove() []Geom
-    //serialize() string
-    //unserialize( map[string]Geom, string ) bool
+    move( f64, f64 )
+    add( Id )
+    remove() []Id
+    unserialise( mut Loader, mut Model ) !
 }
-
-/*fn (g Geom) hash() string {*/
-/*    ptr := unsafe{ voidptr( g ) }*/
-/*    return "$ptr"*/
-/*}*/
-
-// -
 
 // until we have ?Geom types, lets make a model.None type, which conforms to the
 // Geom interface. TODO: should fix this
-pub struct None {}
+pub struct None{ id Id }
+fn (_ None) kind() string { return '' }
 fn (_ None) test( _ f64, _ f64 ) f64 { return 0 }
 fn (_ None) draw( _ ui.DrawDevice, _ ui.CanvasLayout, _ UIState ) {}
-fn (mut _ None) add() {}
-fn (mut _ None) remove() []Geom { return [] }
-//fn (mut _ None) serialize() string { return '' }
-//fn (mut _ None) unserialize( _ map[string]Geom, g string ) bool { return true }
+fn (_ None) handle() ( f64, f64 ) { return 0, 0 }
+fn (mut _ None) move( _ f64, _ f64 ) {}
+fn (mut _ None) add( _ Id ) {}
+fn (mut _ None) remove() []Id { return [] }
+fn (_ None) serialise( mut _ strings.Builder ) {}
+fn (_ None) unserialise( mut _ Loader, mut _ Model ) ! {}

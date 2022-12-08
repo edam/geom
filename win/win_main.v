@@ -43,6 +43,7 @@ pub fn new_main_window() &MainWindow {
     mut mw := &MainWindow{
         win: 0
         tools: map[string]Tool{}
+        model: model.new_model()
     }
     mut btns := []ui.Widget{}
     add_tool := fn[ mut mw, mut btns ]( tool Tool ) []ui.Widget {
@@ -77,6 +78,7 @@ pub fn new_main_window() &MainWindow {
                         id: 'canvas'
 						bg_color: gx.white
 						bg_radius: .025
+                        scrollview: true,
 						on_draw: mw.on_draw
                         on_mouse_down: mw.on_mouse_down
                         on_mouse_up: mw.on_mouse_up
@@ -102,7 +104,7 @@ fn (mut mw MainWindow)init_window( mut w ui.Window ) {
 }
 
 fn (mut mw MainWindow) tool_click( mut b ui.Button ) {
-    mw.model.unhighlight()
+    mw.model.clear_highlighted()
     mw.model.clear_selected()
     if mut b.parent is ui.Stack {
 		for _, mut btn in b.parent.children {
@@ -122,7 +124,9 @@ fn (mut mw MainWindow) tool_click( mut b ui.Button ) {
 fn (mut mw MainWindow) on_key_down( w &ui.Window, e ui.KeyEvent ) {
     if e.key == .escape {
         // TODO: w.close() not implemented (no multi-window support yet!)
-        w.ui.gg.quit()
+        if w.ui.dd is ui.DrawDeviceContext {
+            w.ui.dd.quit()
+        }
     }
 }
 
@@ -148,15 +152,19 @@ fn (mut mw MainWindow) on_draw( d ui.DrawDevice, c &ui.CanvasLayout ) {
 
     // ----
 
-    mut tool := mw.tools[ mw.tool ] or { return }
-    x := c.x + c.offset_x
-    y := c.y + c.offset_y
-    d.scissor_rect( x, y, c.width, c.height )
+    //x := c.x + c.offset_x
+    //y := c.y + c.offset_y
+    //d.scissor_rect( x, y, c.width, c.height )
+
     mw.model.draw( d, c )
+
     if mw.mouse.on {
-        tool.draw( d, c, mw.mouse.x, mw.mouse.y )
+        if mut tool := mw.tools[ mw.tool ] {
+            tool.draw( d, c, mw.mouse.x, mw.mouse.y )
+        }
     }
-    d.scissor_rect( 0, 0, mw.win.width, mw.win.height )
+
+    //d.scissor_rect( 0, 0, mw.win.width, mw.win.height )
 }
 
 fn (mut mw MainWindow) on_mouse_down( c &ui.CanvasLayout, e ui.MouseEvent ) {

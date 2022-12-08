@@ -13,6 +13,7 @@ struct ToolSelect {
     title string
     mut:
     model &model.Model
+    hover &model.Geom = model.None{}
     dragging bool
 }
 
@@ -41,31 +42,31 @@ fn (mut t ToolSelect) draw( d ui.DrawDevice, c ui.CanvasLayout, x f64, y f64 ) {
 }
 
 fn (mut t ToolSelect) move( x f64, y f64  ) {
-    if t.dragging {
-        if mut t.model.highlighted is model.Point {
-            t.model.highlighted.move( x, y )
-        }
-    }
-    else {
-        t.model.highlight(
-            t.model.test( x, y, fn( g model.Geom ) bool {
-                return g !is model.None
-            } )
-        )
-    }
+    //if t.dragging {
+    //    if mut t.model.highlighted is model.Point {
+    //        t.model.highlighted.move( x, y )
+    //    }
+    //}
+    //else {
+    //    t.model.highlight(
+    //        t.model.test( x, y, fn( g model.Geom ) bool {
+    //            return g !is model.None
+    //        } )
+    //    )
+    //}
 }
 
 fn (mut t ToolSelect) down( x f64, y f64 ) {
-    if t.model.highlighted !is model.None {
-        t.model.set_selected( t.model.highlighted )
-        t.dragging = true
-    }
+    //if t.model.highlighted !is model.None {
+    //    t.model.set_selected( t.model.highlighted )
+    //    t.dragging = true
+    //}
 }
 
 fn (mut t ToolSelect) up( x f64, y f64 ) {
-    if t.dragging {
-        t.dragging = false
-    }
+    //if t.dragging {
+    //    t.dragging = false
+    //}
 }
 
 fn (mut t ToolSelect) menu( x f64, y f64 ) {

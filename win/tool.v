@@ -17,3 +17,11 @@ interface Tool {
     up( f64, f64 )
     menu( f64, f64 )
 }
+
+struct Dragging {
+    mut:
+    on bool
+    dx f64
+    dy f64
+    dirty bool
+}

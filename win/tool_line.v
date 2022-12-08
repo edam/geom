@@ -15,12 +15,8 @@ struct ToolLine {
     mut:
     model &model.Model
     anchor model.Geom = model.None{}
-    dragging struct {
-        mut:
-        on bool
-        dx f64
-        dy f64
-    }
+    hover model.Geom = model.None{}
+    dragging Dragging
 }
 
 fn new_line_tool( mut model &model.Model ) &ToolLine {
@@ -32,14 +28,15 @@ fn new_line_tool( mut model &model.Model ) &ToolLine {
 }
 
 fn (mut t ToolLine) reset() {
-    t.anchor = model.None{} // TODO: make t.anchor ?model.Point
+    t.anchor = &model.None{} // TODO: make t.anchor ?model.Point
+    t.hover = &model.None{}
 }
 
 fn (mut t ToolLine) draw( d ui.DrawDevice, c ui.CanvasLayout, x f64, y f64 ) {
-    mut cursor := if t.model.highlighted is model.None {
+    mut cursor := if t.hover is model.None {
         model.Geom( model.Point{ x: x, y: y } )
     } else {
-        t.model.highlighted
+        t.hover
     }
     cursor.draw( d, c, .cursor )
 
@@ -56,49 +53,75 @@ fn (mut t ToolLine) draw( d ui.DrawDevice, c ui.CanvasLayout, x f64, y f64 ) {
 
 fn (mut t ToolLine) move( x f64, y f64 ) {
     if t.dragging.on {
-        if mut t.model.highlighted is model.Line {
-            t.model.highlighted.move( x - t.dragging.dx, y - t.dragging.dy )
+        if mut t.hover is model.Line {
+            t.hover.move( x - t.dragging.dx, y - t.dragging.dy )
+            t.dragging.dirty = true
         }
     }
     else {
-        t.model.highlight(
-            if t.anchor is model.None {
+        t.hover = if t.anchor is model.None {
+            // TODO: this code will be loads nice when we have optionals!
+            line := t.model.test( x, y, fn( g model.Geom ) bool {
+                return g is model.Point
+            } )
+            if line !is model.None { line } else {
                 t.model.test( x, y, fn( g model.Geom ) bool {
-                    return g is model.Point || g is model.Line
-                } )
-            } else {
-                t.model.test( x, y, fn( g model.Geom ) bool {
-                    return g is model.Point
+                    return g is model.Line
                 } )
             }
-        )
+        } else {
+            t.model.test( x, y, fn( g model.Geom ) bool {
+                return g is model.Point
+            } )
+        }
+        t.model.set_highlighted( t.hover )
+        if mut t.hover is model.Line {
+            t.model.add_highlighted( t.hover.p1 )
+            t.model.add_highlighted( t.hover.p2 )
+        }
     }
 }
 
 fn (mut t ToolLine) down( x f64, y f64 ) {
-    if mut t.model.highlighted is model.Line {
-        t.model.set_selected( t.model.highlighted )
-        t.dragging.on = true
-        t.dragging.dx = x - t.model.highlighted.p1.x
-        t.dragging.dy = y - t.model.highlighted.p1.y
+    if mut t.hover is model.Line {
+        t.model.set_selected( t.hover )
+        t.dragging = Dragging{
+            on: true
+            dx: x - t.hover.p1.x
+            dy: y - t.hover.p1.y
+            dirty: false
+        }
     }
 }
 
 fn (mut t ToolLine) up( x f64, y f64 ) {
     if t.dragging.on {
         t.dragging.on = false
-    } else if mut t.model.highlighted is model.Point {
+        if t.dragging.dirty {
+            t.model.autosave()
+        }
+    } else if mut t.hover is model.Point {
         if mut t.anchor is model.Point {
-            if t.anchor != t.model.highlighted {
-                mut line := model.Line{ t.anchor, t.model.highlighted }
-                t.model.add( mut line, .lines )
-                t.model.highlight( line )
+            if t.anchor != t.hover {
+                mut line := model.Line{
+                    p1: t.anchor
+                    p2: t.hover
+                }
+
+                // is there an existing line for these points?
+                existing := t.anchor.get_lines( t.model ).filter(
+                    ( it.p1 == t.anchor || it.p1 == t.hover ) &&
+                        ( it.p2 == t.anchor || it.p2 == t.hover ) )
+                if existing.len == 0 {
+                    t.model.add( mut line, .lines )
+                    t.model.set_highlighted( line )
+                }
             }
-            t.anchor = model.None{}
+            t.anchor = &model.None{}
             t.model.clear_selected()
         } else {
-            t.anchor = t.model.highlighted
-            t.model.set_selected( t.model.highlighted )
+            t.anchor = t.hover
+            t.model.set_selected( t.hover )
         }
     }
 }
@@ -106,8 +129,10 @@ fn (mut t ToolLine) up( x f64, y f64 ) {
 fn (mut t ToolLine) menu( x f64, y f64 ) {
     t.model.clear_selected()
     if t.anchor is model.Point {
-        t.anchor = model.None{}
-    } else if mut t.model.highlighted is model.Line {
-        t.model.remove( mut t.model.highlighted )
+        t.anchor = &model.None{}
+    } else if mut t.hover is model.Line {
+        t.model.remove( mut t.hover )
+        t.hover = &model.None{}
+        t.move( x, y )
     }
 }
