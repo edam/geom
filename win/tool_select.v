@@ -25,7 +25,9 @@ fn new_select_tool( mut model &model.Model ) &ToolSelect {
     }
 }
 
-fn (mut t ToolSelect) reset() {}
+fn (mut t ToolSelect) active( mut _ MainWindow ) {}
+
+fn (mut t ToolSelect) inactive( mut mw MainWindow ) {}
 
 fn (mut t ToolSelect) draw( d ui.DrawDevice, c ui.CanvasLayout, x f64, y f64 ) {
     /*mut accept_fn := model.AcceptFn( 0 )*/

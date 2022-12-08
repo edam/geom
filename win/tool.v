@@ -10,7 +10,8 @@ interface Tool {
     name string
     title string
     mut:
-    reset()
+    active( mut MainWindow )
+    inactive( mut MainWindow )
     draw( ui.DrawDevice, ui.CanvasLayout, f64, f64 )
     move( f64, f64 )
     down( f64, f64 )

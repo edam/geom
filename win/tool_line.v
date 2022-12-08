@@ -27,10 +27,12 @@ fn new_line_tool( mut model &model.Model ) &ToolLine {
     }
 }
 
-fn (mut t ToolLine) reset() {
+fn (mut t ToolLine) active( mut _ MainWindow ) {
     t.anchor = &model.None{} // TODO: make t.anchor ?model.Point
     t.hover = &model.None{}
 }
+
+fn (mut t ToolLine) inactive( mut mw MainWindow ) {}
 
 fn (mut t ToolLine) draw( d ui.DrawDevice, c ui.CanvasLayout, x f64, y f64 ) {
     mut cursor := if t.hover is model.None {

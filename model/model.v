@@ -41,6 +41,14 @@ pub fn new_model() Model {
     return m
 }
 
+pub fn (mut m Model) reset() {
+    m.clear_highlighted()
+    m.clear_selected()
+    m.geometry = &map[u64]Geom{}
+    m.layers = [][]Id{ len: int( Layer.len ), init: []Id{} }
+    m.last_id = 0
+}
+
 fn (m Model) geometry( id Id ) Geom {
     unsafe {
         return m.geometry[ id ] or {

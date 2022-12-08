@@ -14,6 +14,7 @@ struct MainWindow {
     win &ui.Window
     tools map[string]Tool
     tool string
+    last_tool string
     mouse struct {
         mut:
         on bool
@@ -22,18 +23,6 @@ struct MainWindow {
     }
     model model.Model
 }
-
-/*fn (mw MainWindow) get_tool() string {*/
-/*	mut row := mw.win.stack( 'tool_row' )*/
-/*	for _, mut btn in row.children {*/
-/*		if mut btn is ui.Button {*/
-/*			if btn.disabled {*/
-/*				return btn.id*/
-/*			}*/
-/*		}*/
-/*	}*/
-/*	return 'none'*/
-/*}*/
 
 pub fn (mw MainWindow) run() {
 	ui.run( mw.win )
@@ -58,6 +47,7 @@ pub fn new_main_window() &MainWindow {
     btns = add_tool( new_select_tool( mut mw.model ) )
     btns = add_tool( new_point_tool( mut mw.model ) )
     btns = add_tool( new_line_tool( mut mw.model ) )
+    btns = add_tool( new_clear_tool( mut mw.model ) )
     mw.win = ui.window(
 		width: 600
 		height: 400
@@ -84,6 +74,7 @@ pub fn new_main_window() &MainWindow {
                         on_mouse_up: mw.on_mouse_up
 					),
 					ui.row(
+                        id: 'tool_row'
 						spacing: 10
 						widths: ui.stretch
 						children: btns
@@ -95,30 +86,50 @@ pub fn new_main_window() &MainWindow {
     return mw
 }
 
+fn (mw MainWindow) get_tool_btn( name string ) &ui.Button {
+	mut row := mw.win.stack( 'tool_row' )
+	for _, mut btn in row.children {
+		if mut btn is ui.Button {
+            if btn.id == name {
+                return btn
+            }
+		}
+	}
+    panic( "get_tool() request for invalid button: ${name}" )
+}
+
 fn (mut mw MainWindow)init_window( mut w ui.Window ) {
-	// initial tool selection
-	/*mut btn := w.button( mw.tool )*/
-	/*btn.disabled = true*/
-	/*mut f := ui.Focusable( btn )*/
-	/*f.set_focus()*/
+    mw.select_tool( 'select' )
 }
 
 fn (mut mw MainWindow) tool_click( mut b ui.Button ) {
+    mw.select_tool( b.id )
+}
+
+fn (mut mw MainWindow) select_last_tool() {
+    mw.select_tool( mw.last_tool )
+}
+
+fn (mut mw MainWindow) select_tool( name string ) {
     mw.model.clear_highlighted()
     mw.model.clear_selected()
-    if mut b.parent is ui.Stack {
-		for _, mut btn in b.parent.children {
-			if mut btn is ui.Button {
-                // reset any selected tool
-                if !btn.disabled {
-                    mw.tools[ btn.id ].reset()
-                }
-                // select/unselect tool
-				btn.disabled = btn.id == b.id
-			}
-		}
-	}
-    mw.tool = b.id
+
+    // deactivate
+    if mw.tool.len > 0 {
+        mut btn := mw.get_tool_btn( mw.tool )
+        btn.disabled = false
+        mw.tools[ mw.tool ].inactive( mut mw )
+    }
+
+    mw.last_tool = mw.tool
+
+    // activate
+    mut btn := mw.get_tool_btn( name )
+    btn.disabled = true
+    mut f := ui.Focusable( btn )
+    f.set_focus()
+    mw.tool = name
+    mw.tools[ mw.tool ].active( mut mw )
 }
 
 fn (mut mw MainWindow) on_key_down( w &ui.Window, e ui.KeyEvent ) {

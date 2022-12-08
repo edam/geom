@@ -25,9 +25,11 @@ fn new_point_tool( mut model &model.Model ) &ToolPoint {
     }
 }
 
-fn (mut t ToolPoint) reset() {
+fn (mut t ToolPoint) active( mut _ MainWindow ) {
     t.hover = &model.None{}
 }
+
+fn (mut t ToolPoint) inactive( mut mw MainWindow ) {}
 
 fn (mut t ToolPoint) draw( d ui.DrawDevice, c ui.CanvasLayout, x f64, y f64 ) {
     if t.hover is model.Point {
